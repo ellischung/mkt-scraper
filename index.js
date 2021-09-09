@@ -1,10 +1,7 @@
 const puppeteer = require('puppeteer');
 
 async function getListings() {
-    const browser = await puppeteer.launch({
-        headless: false,
-        defaultViewport: null
-    });
+    const browser = await puppeteer.launch();
 
     const page = await browser.newPage();
 
@@ -24,6 +21,8 @@ async function getListings() {
             properties.price = priceElement ? priceElement.innerText : '';
             const imageElement = row.querySelector('.swipe [data-index="0"] img');
             properties.imageUrl = imageElement ? imageElement.src : '';
+            const dateElement = row.querySelector('.result-date');
+            properties.date = dateElement.innerText;
             return properties;
         });
     })
