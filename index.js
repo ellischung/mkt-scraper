@@ -21,10 +21,6 @@ async function getListings() {
             properties.url = titleElement.getAttribute('href');
             const priceElement = row.querySelector('.result-price');
             properties.price = priceElement ? priceElement.innerText : '';
-            const imageElement = row.querySelector('.swipe [data-index="0"] img');
-            properties.imageUrl = imageElement ? imageElement.src : '';
-            const dateElement = row.querySelector('.result-date');
-            properties.date = dateElement.innerText;
             return properties;
         });
     })
@@ -35,7 +31,7 @@ async function getListings() {
 }
 
 async function startScraping() {
-    let job = new CronJob('*/15 * * * * *', function() {
+    let job = new CronJob('* */30 * * * *', function() {
         getListings();
     }, null, true, null, null, true);
     job.start();
@@ -50,12 +46,18 @@ async function sendNotification(listings) {
         }
     });
 
-    let textBody = listings.toString();
+    let textBody = 'Craigslist Gaming PCs\n\n';
+    
+    listings.map(listing => {
+        textBody += JSON.stringify(listing.title) + '\n';
+        textBody += JSON.stringify(listing.url) + '\n'; 
+        textBody += JSON.stringify(listing.price) + '\n\n\n'; 
+    })
 
     let info = await transporter.sendMail({
-        from: '"New gaming pc listings" <fordevemailacc@gmail.com>',
+        from: '"New Listings!" <fordevemailacc@gmail.com>',
         to: '',
-        subject: 'Craigslist Gaming PCs',
+        subject: 'Gaming PCs',
         text: textBody
     });
 
