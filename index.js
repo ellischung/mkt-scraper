@@ -93,7 +93,7 @@ async function getListingInfo(url) {
 }
 
 async function startScraping() {
-    let job = new CronJob('* */60 * * * *', function() { // executes every hour
+    let job = new CronJob('0 */3 * * *', function() { // executes every 3 hours
         getListings();
     }, null, true, null, null, true);
     job.start();
