@@ -10,8 +10,20 @@ async function getListings() {
 
     const page = await browser.newPage();
 
+    // set search to any string
+    const search = 'gaming pc';
+    const splitSearch = search.split(' ');
+    let searchQuery = '';
+    for(let i = 0; i < splitSearch.length - 1; i++) {
+        searchQuery += splitSearch[i] + '%20';
+    };
+    searchQuery += splitSearch[splitSearch.length - 1];
+
+    // set price to any integer
+    const price = 800;
+
     // link to search results
-    const url = 'https://newyork.craigslist.org/d/for-sale/search/sss?max_price=500&query=gaming%20pc&sort=rel';
+    const url = `https://newyork.craigslist.org/d/for-sale/search/sss?max_price=${price}&query=${searchQuery}&sort=rel`;
 
     await page.goto(url);
 
@@ -81,7 +93,7 @@ async function getListingInfo(url) {
 }
 
 async function startScraping() {
-    let job = new CronJob('* */30 * * * *', function() { // executes every 30 minutes
+    let job = new CronJob('* */60 * * * *', function() { // executes every hour
         getListings();
     }, null, true, null, null, true);
     job.start();
@@ -96,12 +108,8 @@ async function sendNotification(listings) {
         }
     });
 
-    const craigslist = "---------------Craigslist Gaming PCs---------------";
-    //const facebook = "----------Facebook Marketplace Gaming PCs----------";
-    //const offerup = "-----------------OfferUp Gaming PCs-----------------";
-
-    let textBody = craigslist + '\n\n';
-    
+    // message to send with all of the information from the listings
+    let textBody = "----------------Craigslist Listings----------------" + '\n\n\n';
     listings.map(listing => {
         textBody += JSON.stringify(listing.title) + '\n';
         textBody += JSON.stringify(listing.price) + '\n'; 
@@ -114,12 +122,13 @@ async function sendNotification(listings) {
     });
 
     let info = await transporter.sendMail({
-        from: '"New Listings!"',
+        from: '"New Listings!" <user@gmail.com>',
         to: '',
-        subject: 'Gaming PCs',
+        subject: 'Gaming PCs under $800',
         text: textBody
     });
 
+    // success if logged with a message ID
     console.log('Email sent: %s', info.messageId);
 }
 
